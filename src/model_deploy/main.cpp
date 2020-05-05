@@ -30,6 +30,12 @@ int last_state =0;
 
 int first_print =0;
 
+int song =0;
+
+int now_song =0;
+
+int change_mode_show =0;
+
 uLCD_4DGL uLCD(D1, D0, D2);
 
 InterruptIn button(SW2);
@@ -44,7 +50,11 @@ int mode =0;
 
 int push =0;
 
+char list[3]={0x41, 0x42, 0x43};
 
+int main_page =0;
+
+int change_mode_in =0;
 
 /*void mode_select(){
 
@@ -352,14 +362,37 @@ int main(int argc, char* argv[]) {
 
 
     if(push){
-
+      if(change_mode_in ==0)
+      {
         if(first_print){
-          if(mode==0)
-            uLCD.printf("backward songs");
-          if(mode==1)
-            uLCD.printf("forward songs");
-          if(mode==2)
-            uLCD.printf("change songs");
+          if(mode==0){
+            if(now_song > 1)
+              song = now_song -1;
+            else 
+              song =2;
+            uLCD.cls();
+            uLCD.printf("backward songs\n\n\n\n\n");
+            uLCD.printf("%c",list[song]);
+          }
+          
+          if(mode==1){
+            if(now_song < 2)
+              song = now_song +1;
+            else 
+              song =0;
+            uLCD.cls();
+            uLCD.printf("forward songs\n\n\n\n\n");
+            uLCD.printf("%c",list[song]);
+          }
+            
+          if(mode==2){
+            uLCD.cls();
+            uLCD.printf("change songs\n\n\n\n\n");
+            uLCD.printf("%c\n",list[0]);
+            uLCD.printf("%c\n",list[1]);
+            uLCD.printf("%c\n",list[2]);
+          }
+            
         first_print=0;  
         }
 
@@ -383,9 +416,18 @@ int main(int argc, char* argv[]) {
         }
         if(mode==0){
           if(last_state){
+          
+            if(mode==0){
+              if(now_song > 0)
+                song = now_song -1;
+              else 
+                song =2;  
+            }
             uLCD.cls();
             last_state=0;
-            uLCD.printf("backward songs");
+            uLCD.printf("backward songs\n\n\n\n\n");
+            uLCD.printf("%c",list[song]); 
+            main_page =0;
           }
           
     
@@ -400,11 +442,19 @@ int main(int argc, char* argv[]) {
 
 
         }
-      if(mode==1){
+        if(mode==1){
           if(last_state){
+            if(mode==1){
+              if(now_song < 2)
+                song = now_song +1;
+              else 
+                song =0;  
+            }
             uLCD.cls();
             last_state=0;
-            uLCD.printf("forward songs");
+            uLCD.printf("forward songs\n\n\n\n\n");
+            uLCD.printf("%c",list[song]);
+            main_page =0;
           }
 
         //  uLCD.text_width(4); //4X size text
@@ -417,12 +467,16 @@ int main(int argc, char* argv[]) {
 
         
 
-      }
-      if(mode==2){
+        }
+        if(mode==2){
           if(last_state){
             uLCD.cls();
             last_state=0;
-            uLCD.printf("change songs");
+            uLCD.printf("change songs\n\n\n\n\n");
+            uLCD.printf("%c\n",list[0]);
+            uLCD.printf("%c\n",list[1]);
+            uLCD.printf("%c\n",list[2]);
+            main_page =0;
           }
 
         //  uLCD.text_width(4); //4X size text
@@ -430,17 +484,86 @@ int main(int argc, char* argv[]) {
         //  uLCD.text_height(4);
 
           uLCD.color(RED);
-
         //  uLCD.locate(1,2);
-
-        
-
+        if(Switch == 0){
+            change_mode_in =1;
+        }
       }
     
     }
+    if(change_mode_in ==1){
+        if(gesture_index ==0){
+          change_mode_show =0;
+          if(now_song<1)
+            now_song=2;
+          else
+          {
+            now_song=now_song-1;
+          }
+        }
+        if(gesture_index ==1){
+          change_mode_show =0;
+          if(now_song>1)
+            now_song=0;
+          else
+          {
+            now_song=now_song+1;
+          }
+        }
+        song=now_song;
+        if(change_mode_show ==0){
+          uLCD.cls();
+          change_mode_show =1;
+
+          
+          uLCD.color(RED);   
+          uLCD.printf("change songs\n\n\n\n\n");
+          if(now_song == 0){
+            uLCD.color(WHITE);
+            uLCD.printf("A\n");
+            uLCD.color(RED);
+            uLCD.background_color(BLACK);
+            uLCD.printf("B\n");
+            uLCD.printf("C\n");
+          }
+          if(now_song == 1){
+            uLCD.color(RED);
+            uLCD.background_color(BLACK);            
+            uLCD.printf("A\n");            
+            uLCD.color(WHITE);
+            uLCD.printf("B\n");
+            uLCD.color(RED);
+            uLCD.background_color(BLACK);            
+            uLCD.printf("C\n");   
+
+          }
+          if(now_song == 2){
+            uLCD.color(RED);       
+            uLCD.printf("A\n");            
+            uLCD.printf("B\n");
+            uLCD.color(WHITE);         
+            uLCD.printf("C\n");   
+
+          }
+        }
+    }
+  }
     else{
-    uLCD.cls();
-      uLCD.printf("Song player");
+
+
+    //    uLCD.cls();
+      if(main_page ==0){
+        uLCD.color(RED);
+        uLCD.background_color(BLACK);
+        now_song = song;
+        uLCD.cls();
+        uLCD.printf("Song player\n\n\n\n\nNow Playing:%c",list[now_song]);
+        main_page =1;
+      }
+      change_mode_in =0;
+
+
+      
     }
 
 
