@@ -21,8 +21,23 @@
 
 #include "uLCD_4DGL.h"
 
+#include <cmath>
+
+#include "DA7212.h"
+
+
+#define bufferLength (32)
+
+#define signalLength (1024)
+
+
+DA7212 audio;
+
+Serial pc(USBTX, USBRX);
 
 // The gesture index of the prediction
+
+int number =0;
 
 int gesture_index;
 
@@ -36,11 +51,19 @@ int now_song =0;
 
 int change_mode_show =0;
 
+int change_song =0;
+
+int16_t waveform[kAudioTxBufferSize];
+
+char serialInBuffer[bufferLength];
+
 uLCD_4DGL uLCD(D1, D0, D2);
 
 InterruptIn button(SW2);
 
 DigitalIn  Switch(SW3);
+
+DigitalOut green_led(LED2);
 
 EventQueue queue(32 * EVENTS_EVENT_SIZE);
 
@@ -55,6 +78,59 @@ char list[3]={0x41, 0x42, 0x43};
 int main_page =0;
 
 int change_mode_in =0;
+
+int serialCount =0;
+
+float song_note[42];
+
+void loadSignal(void)
+
+{
+
+  green_led = 0;
+
+  int i = 0;
+
+  serialCount = 0;
+
+  audio.spk.pause();
+
+  i = 0;
+  
+  serialCount =0;
+  while(i < 42)
+
+  {
+
+    if(pc.readable())
+
+    {
+
+      serialInBuffer[serialCount] = pc.getc();
+
+      serialCount++;
+
+      if(serialCount == 5)
+
+      {
+
+        serialInBuffer[serialCount] = '\0';
+
+        song_note[i] = (float) atof(serialInBuffer);
+
+        serialCount = 0;
+
+        i++;
+
+      }
+
+    }
+
+  }
+  green_led = 1;
+
+}
+
 
 /*void mode_select(){
 
@@ -91,6 +167,42 @@ int change_mode_in =0;
   }
 //}
 }*/
+
+void playNote(float freq[])
+
+{
+  float frequency =  freq[number];
+  //(int16_t) (freq[number])*((1<<16)-1) ;
+
+  if(number < 42){
+    number = number +1;
+  }
+  else{
+    number =0;
+  }
+
+  for (int i = 0; i < kAudioTxBufferSize; i++)
+
+  {
+
+  waveform[i] = (int16_t) (sin((double)i * 2. * M_PI/(double) (kAudioSampleFrequency /( 500*frequency))) * ((1<<16) - 1));
+
+  }
+
+  // the loop below will play the note for the duration of 1s
+
+
+
+  for(int j = 0; j < kAudioSampleFrequency / kAudioTxBufferSize; ++j)
+
+  {
+
+    audio.spk.play(waveform, kAudioTxBufferSize);
+
+  }
+
+}
+
 void change_mode(){
   
   if(push ==0)
@@ -189,7 +301,7 @@ int main(int argc, char* argv[]) {
 
   uint8_t tensor_arena[kTensorArenaSize];
 
-
+  green_led =0;
   // Whether we should clear the buffer next time we fetch data
 
   bool should_clear_buffer = false;
@@ -392,27 +504,32 @@ int main(int argc, char* argv[]) {
             uLCD.printf("%c\n",list[1]);
             uLCD.printf("%c\n",list[2]);
           }
-            
+          if(mode==3){
+            uLCD.cls();
+            uLCD.printf("Taiko game\n");
+          }            
         first_print=0;  
         }
 
         if(gesture_index ==0){
           last_state=1;
           if(mode<1)
-            mode=2;
+            mode=3;
           else
           {
             mode=mode-1;
           }
+          change_song =0;
         }
         if(gesture_index ==1){
           last_state=1;
-          if(mode>1)
+          if(mode>2)
             mode=0;
           else
           {
             mode=mode+1;
           }
+          change_song =0;
         }
         if(mode==0){
           if(last_state){
@@ -489,7 +606,25 @@ int main(int argc, char* argv[]) {
             change_mode_in =1;
         }
       }
-    
+         if(mode==3){
+          if(last_state){
+            uLCD.cls();
+            last_state=0;
+            uLCD.printf("Taiko game");
+            main_page =0;
+          }
+
+        //  uLCD.text_width(4); //4X size text
+
+        //  uLCD.text_height(4);
+
+          uLCD.color(RED);
+
+        //  uLCD.locate(1,2);
+
+        
+
+        }   
     }
     if(change_mode_in ==1){
         if(gesture_index ==0){
@@ -549,18 +684,34 @@ int main(int argc, char* argv[]) {
     }
   }
     else{
+      green_led=0;
+      if(change_song ==0){
+        //error_reporter->Report("%d\n",1);
+        //pc.printf("%d\r\n",1);
+        loadSignal();
+        change_song =1;
+        //pc.printf("%d\r\n",0);
+        error_reporter->Report("%d\n",0);
+      }
 
-
+      
     //    uLCD.cls();
       if(main_page ==0){
         uLCD.color(RED);
         uLCD.background_color(BLACK);
         now_song = song;
         uLCD.cls();
-        uLCD.printf("Song player\n\n\n\n\nNow Playing:%c",list[now_song]);
+        if(mode!=3){
+          uLCD.printf("Song player\n\n\n\n\nNow Playing:%c",list[now_song]);
+        }
+        else{
+          uLCD.printf("Taiko game\n\n\n\n\nNow Playing:%c",list[now_song]);  
+        }
+        
         main_page =1;
       }
       change_mode_in =0;
+      playNote(song_note);
 
 
       
