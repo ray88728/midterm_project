@@ -686,7 +686,7 @@ int main(int argc, char* argv[]) {
     else{
       green_led=0;
       if(change_song ==0){
-        //error_reporter->Report("%d\n",1);
+        error_reporter->Report("%d\n",1);
         //pc.printf("%d\r\n",1);
         loadSignal();
         change_song =1;
@@ -711,7 +711,11 @@ int main(int argc, char* argv[]) {
         main_page =1;
       }
       change_mode_in =0;
-      playNote(song_note);
+      while(change_song){
+        playNote(song_note);
+        wait_us(1);
+      }
+      
 
 
       

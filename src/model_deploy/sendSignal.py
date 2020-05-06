@@ -45,8 +45,10 @@ s = serial.Serial(serdev)
 
 while a != 2:
     b = s.readline()
-    c = float(b[0])
-    if c > 0.5:
+   # print(b[0])
+    print(b)
+    c = (b)
+    if b[0] == 49:
         print("Sending signal ...")
 
         #print("It may take about %d seconds ..." % (int(signalLength * waitTime)))
