@@ -709,7 +709,7 @@ int main(int argc, char* argv[]) {
       }
       int j=0;
       change_mode_in =0;
-      while(change_song){
+      while(change_song&&!push){
         playNote(song_note);
         wait_us(4000000*noteLength[number]);
         //if(j<42){
