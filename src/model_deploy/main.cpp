@@ -120,8 +120,9 @@ void loadSignal(void)
 
         serialCount = 0;
 
-        i++;
+        //uLCD.printf('%.3f\n',song_note[i]);
 
+        i++;
       }
 
     }
@@ -132,74 +133,36 @@ void loadSignal(void)
 }
 
 
-/*void mode_select(){
-
-//while(push){
-  if(mode==0){
-
-    uLCD.cls();
-    
-    uLCD.text_width(4); //4X size text
-
-    uLCD.text_height(4);
-
-    uLCD.color(RED);
-
-    uLCD.locate(1,2);
-
-    uLCD.printf("backward songs");
-
-  }
-  if(mode==1){
-
-    uLCD.cls();
-
-    uLCD.text_width(4); //4X size text
-
-    uLCD.text_height(4);
-
-    uLCD.color(RED);
-
-    uLCD.locate(1,2);
-
-    uLCD.printf("forward songs");
-
-  }
-//}
-}*/
-
 void playNote(float freq[])
 
 {
   float frequency =  freq[number];
   //(int16_t) (freq[number])*((1<<16)-1) ;
 
-  if(number < 42){
-    number = number +1;
-  }
-  else{
-    number =0;
-  }
-
-  for (int i = 0; i < kAudioTxBufferSize; i++)
-
-  {
-
-  waveform[i] = (int16_t) (sin((double)i * 2. * M_PI/(double) (kAudioSampleFrequency /( 500*frequency))) * ((1<<16) - 1));
-
-  }
-
-  // the loop below will play the note for the duration of 1s
-
-
 
   for(int j = 0; j < kAudioSampleFrequency / kAudioTxBufferSize; ++j)
 
   {
+    for (int i = 0; i < kAudioTxBufferSize; i++)
 
+    {
+
+    waveform[i] = (int16_t) (sin((double)i * 2. * M_PI/(double) (kAudioSampleFrequency /( 500*frequency))) * ((1<<16) - 1));
+
+    }
+    
     audio.spk.play(waveform, kAudioTxBufferSize);
 
   }
+  // the loop below will play the note for the duration of 1s
+  uLCD.printf("%d\r",number);
+  if(number < 42){
+    number = number +1;
+  }
+  else{
+    ;
+  }
+
 
 }
 
@@ -702,7 +665,7 @@ int main(int argc, char* argv[]) {
         now_song = song;
         uLCD.cls();
         if(mode!=3){
-          uLCD.printf("Song player\n\n\n\n\nNow Playing:%c",list[now_song]);
+          uLCD.printf("Song player\n\n\n\n\nNow Playing:%c\n",list[now_song]);
         }
         else{
           uLCD.printf("Taiko game\n\n\n\n\nNow Playing:%c",list[now_song]);  
@@ -710,10 +673,16 @@ int main(int argc, char* argv[]) {
         
         main_page =1;
       }
+      int j=0;
       change_mode_in =0;
       while(change_song){
         playNote(song_note);
-        wait_us(1);
+        wait_us(1000000);
+        //if(j<42){
+        //  uLCD.printf("%.3f\n",song_note[j]);
+        //  j++;
+        //}
+        
       }
       
 
