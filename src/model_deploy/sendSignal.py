@@ -29,7 +29,25 @@ song =np.array(
 
 )
 
+noteLength =np.array(
+[
+  1, 1, 1, 1, 1, 1, 2,
+
+  1, 1, 1, 1, 1, 1, 2,
+
+  1, 1, 1, 1, 1, 1, 2,
+
+  1, 1, 1, 1, 1, 1, 2,
+
+  1, 1, 1, 1, 1, 1, 2,
+
+  1, 1, 1, 1, 1, 1, 2
+]
+)
+
 song = song /500
+
+noteLength = noteLength /4;
 # output formatter
 
 a = 1
@@ -59,7 +77,11 @@ while a != 2:
             s.write(bytes(formatter(data), 'UTF-8'))
 
             time.sleep(waitTime)
+        for data in noteLength:
 
+            s.write(bytes(formatter(data), 'UTF-8'))
+
+            time.sleep(waitTime)
         #s.close()
 
         print("Signal sended")

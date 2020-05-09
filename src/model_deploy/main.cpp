@@ -83,6 +83,8 @@ int serialCount =0;
 
 float song_note[42];
 
+float noteLength[42];
+
 void loadSignal(void)
 
 {
@@ -117,6 +119,38 @@ void loadSignal(void)
         serialInBuffer[serialCount] = '\0';
 
         song_note[i] = (float) atof(serialInBuffer);
+
+        serialCount = 0;
+
+        //uLCD.printf('%.3f\n',song_note[i]);
+
+        i++;
+      }
+
+    }
+
+  }
+  i =0;
+  serialCount =0;
+  while(i < 42)
+
+  {
+
+    if(pc.readable())
+
+    {
+
+      serialInBuffer[serialCount] = pc.getc();
+
+      serialCount++;
+
+      if(serialCount == 5)
+
+      {
+
+        serialInBuffer[serialCount] = '\0';
+
+        noteLength[i] = (float) atof(serialInBuffer);
 
         serialCount = 0;
 
@@ -677,7 +711,7 @@ int main(int argc, char* argv[]) {
       change_mode_in =0;
       while(change_song){
         playNote(song_note);
-        wait_us(1000000);
+        wait_us(4000000*noteLength[number]);
         //if(j<42){
         //  uLCD.printf("%.3f\n",song_note[j]);
         //  j++;
