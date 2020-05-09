@@ -174,7 +174,7 @@ void playNote(float freq[])
   //(int16_t) (freq[number])*((1<<16)-1) ;
 
 
-  for(int j = 0; j < kAudioSampleFrequency / kAudioTxBufferSize; ++j)
+  for(int j = 0; (j < kAudioSampleFrequency / kAudioTxBufferSize)&& !push; ++j)
 
   {
     for (int i = 0; i < kAudioTxBufferSize; i++)
@@ -189,7 +189,7 @@ void playNote(float freq[])
 
   }
   // the loop below will play the note for the duration of 1s
-  uLCD.printf("%d\r",number);
+  //uLCD.printf("%d\r",number);
   if(number < 42){
     number = number +1;
   }
@@ -469,8 +469,9 @@ int main(int argc, char* argv[]) {
   button.rise(&change_mode); 
 
 
-
+      audio.spk.pause();
     if(push){
+
       if(change_mode_in ==0)
       {
         if(first_print){
@@ -681,18 +682,6 @@ int main(int argc, char* argv[]) {
     }
   }
     else{
-      green_led=0;
-      if(change_song ==0){
-        error_reporter->Report("%d\n",1);
-        //pc.printf("%d\r\n",1);
-        loadSignal();
-        change_song =1;
-        //pc.printf("%d\r\n",0);
-        error_reporter->Report("%d\n",0);
-      }
-
-      
-    //    uLCD.cls();
       if(main_page ==0){
         uLCD.color(RED);
         uLCD.background_color(BLACK);
@@ -707,13 +696,34 @@ int main(int argc, char* argv[]) {
         
         main_page =1;
       }
+      
+      green_led=0;
+      
+      if(change_song ==0){
+        number =0;
+        if(now_song ==0)
+          error_reporter->Report("%d\n",1);
+        if(now_song ==1)
+          error_reporter->Report("%d\n",2);
+        if(now_song ==2)
+          error_reporter->Report("%d\n",3);
+        //pc.printf("%d\r\n",1);
+        loadSignal();
+        change_song =1;
+        //pc.printf("%d\r\n",0);
+        error_reporter->Report("%d\n",0);
+      }
+
+      
+    //    uLCD.cls();
+
       int j=0;
       change_mode_in =0;
       while(change_song&&!push){
         playNote(song_note);
-        wait_us(4000000*noteLength[number]);
+        wait(4*noteLength[number]);
         //if(j<42){
-        //  uLCD.printf("%.3f\n",song_note[j]);
+        //uLCD.printf("%.3f\r\n",song_note[j]);
         //  j++;
         //}
         
