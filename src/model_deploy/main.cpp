@@ -65,9 +65,13 @@ DigitalIn  Switch(SW3);
 
 DigitalOut green_led(LED2);
 
-EventQueue queue(32 * EVENTS_EVENT_SIZE);
+EventQueue DNNqueue(32 * EVENTS_EVENT_SIZE);
 
-Thread t;
+EventQueue playqueue(32 * EVENTS_EVENT_SIZE);
+
+Thread DNNthread(osPriorityNormal,80*1024/*120K stack size*/);
+
+Thread playthread(osPriorityNormal,80*1024/*120K stack size*/);
 
 int mode =0;
 
@@ -284,10 +288,7 @@ int PredictGesture(float* output) {
 
 }
 
-
-int main(int argc, char* argv[]) {
-
-
+void DNN(){
   // Create an area of memory to use for input, output, and intermediate arrays.
 
   // The size of this will depend on the model you're using, and may need to be
@@ -298,14 +299,11 @@ int main(int argc, char* argv[]) {
 
   uint8_t tensor_arena[kTensorArenaSize];
 
-  green_led =0;
   // Whether we should clear the buffer next time we fetch data
 
   bool should_clear_buffer = false;
 
   bool got_data = false;
-
-
 
   // Set up logging.
 
@@ -466,12 +464,30 @@ int main(int argc, char* argv[]) {
 
  // display.start(LCD_display);
 
+
+    // Clear the buffer next time we read data
+
+    should_clear_buffer = gesture_index < label_num;
+
+  }
+
+}
+
+int main(int argc, char* argv[]) {
+
+  green_led =0;
+
+  playthread.start(callback(&playqueue, &EventQueue::dispatch_forever));
+  // Whether we should clear the buffer next time we fetch data
+
+  DNNthread.start(DNN);
+
   button.rise(&change_mode); 
 
-
-      audio.spk.pause();
+    audio.spk.pause();
+  while(true){
     if(push){
-
+      audio.spk.pause();
       if(change_mode_in ==0)
       {
         if(first_print){
@@ -702,16 +718,15 @@ int main(int argc, char* argv[]) {
       if(change_song ==0){
         number =0;
         if(now_song ==0)
-          error_reporter->Report("%d\n",1);
+          pc.printf("%d\r\n",1);
         if(now_song ==1)
-          error_reporter->Report("%d\n",2);
+          pc.printf("%d\r\n",2);
         if(now_song ==2)
-          error_reporter->Report("%d\n",3);
-        //pc.printf("%d\r\n",1);
+          pc.printf("%d\r\n",3);
+        
         loadSignal();
         change_song =1;
-        //pc.printf("%d\r\n",0);
-        error_reporter->Report("%d\n",0);
+        pc.printf("%d\r\n",0);
       }
 
       
@@ -720,7 +735,7 @@ int main(int argc, char* argv[]) {
       int j=0;
       change_mode_in =0;
       while(change_song&&!push){
-        playNote(song_note);
+        playqueue.call(playNote,song_note);
         wait(4*noteLength[number]);
         //if(j<42){
         //uLCD.printf("%.3f\r\n",song_note[j]);
@@ -734,10 +749,6 @@ int main(int argc, char* argv[]) {
       
     }
 
-
-    // Clear the buffer next time we read data
-
-    should_clear_buffer = gesture_index < label_num;
 
   }
 
