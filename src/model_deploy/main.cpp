@@ -53,6 +53,14 @@ int change_mode_show =0;
 
 int change_song =0;
 
+int beats[42];
+
+int shift_times =0;
+
+int get_point =0;
+
+int begin =0;
+
 int16_t waveform[kAudioTxBufferSize];
 
 char serialInBuffer[bufferLength];
@@ -69,21 +77,29 @@ EventQueue DNNqueue(32 * EVENTS_EVENT_SIZE);
 
 EventQueue playqueue(32 * EVENTS_EVENT_SIZE);
 
+//EventQueue taikoqueue(32 * EVENTS_EVENT_SIZE);
+
 Thread DNNthread(osPriorityNormal,80*1024/*120K stack size*/);
 
 Thread playthread(osPriorityNormal,80*1024/*120K stack size*/);
+
+//Thread taikothread(osPriorityNormal,5*1024/*120K stack size*/);
+
+Timer calculate;
 
 int mode =0;
 
 int push =0;
 
-char list[3]={0x41, 0x42, 0x43};
+char list[3][15]={"Little star", "An dui", "Little bee"};
 
 int main_page =0;
 
 int change_mode_in =0;
 
 int serialCount =0;
+
+int point =0;
 
 float song_note[42];
 
@@ -100,10 +116,9 @@ void loadSignal(void)
   serialCount = 0;
 
   audio.spk.pause();
-
-  i = 0;
   
   serialCount =0;
+
   while(i < 42)
 
   {
@@ -174,45 +189,45 @@ void loadSignal(void)
 void playNote(float freq[])
 
 {
-  float frequency =  freq[number];
   //(int16_t) (freq[number])*((1<<16)-1) ;
 
-
-  for(int j = 0; (j < kAudioSampleFrequency / kAudioTxBufferSize)&& !push; ++j)
-
-  {
-    for (int i = 0; i < kAudioTxBufferSize; i++)
+  
+    
+    float frequency =  freq[number];
+    
+    for(int j = 0; (j < kAudioSampleFrequency / kAudioTxBufferSize)&& !push; ++j)
 
     {
+      for (int i = 0; i < kAudioTxBufferSize; i++)
 
-    waveform[i] = (int16_t) (sin((double)i * 2. * M_PI/(double) (kAudioSampleFrequency /( 500*frequency))) * ((1<<16) - 1));
+      {
+
+      waveform[i] = (int16_t) (sin((double)i * 2. * M_PI/(double) (kAudioSampleFrequency /( 500*frequency))) * ((1<<16) - 1));
+
+      }
+      
+      audio.spk.play(waveform, kAudioTxBufferSize);
 
     }
+    // the loop below will play the note for the duration of 1s
     
-    audio.spk.play(waveform, kAudioTxBufferSize);
-
-  }
-  // the loop below will play the note for the duration of 1s
-  //uLCD.printf("%d\r",number);
-  if(number < 42){
-    number = number +1;
-  }
-  else{
-    ;
-  }
-
-
+   // uLCD.printf("%.3f\r\n",freq[number]);  
+    
+    //uLCD.printf("%.3f\r\n",beats[number]);      
 }
 
 void change_mode(){
   
   if(push ==0)
+  {
     push=1;
+  }
   else 
     push=0;
-
+  
+  audio.spk.pause();
   first_print =1;
- //queue.call(mode_select);
+  main_page =0;
 
 }
 // Return the result of the last prediction
@@ -473,21 +488,58 @@ void DNN(){
 
 }
 
+/*void taiko_beat(){
+
+  while(begin ==0){    
+    if(beats[number]==2){
+      if(gesture_index==1){
+        point =point +1;
+        get_point =1;
+      }
+      else if(gesture_index==0){
+        point = point -1;
+        get_point =1;
+      }
+      else{
+        get_point =0;
+      }
+    }
+    
+    if(beats[number]==1){
+      if(gesture_index==0){
+        point =point +1;
+        get_point =1;
+      }
+      else if(gesture_index==1){
+        point = point -1;
+        get_point =1;
+      }
+      else{
+        get_point =0;
+      }
+    }
+}}
+*/
 int main(int argc, char* argv[]) {
 
-  green_led =0;
+  green_led =1;
 
   playthread.start(callback(&playqueue, &EventQueue::dispatch_forever));
+
+ // taikothread.start(callback(&taikoqueue, &EventQueue::dispatch_forever));
+
   // Whether we should clear the buffer next time we fetch data
 
   DNNthread.start(DNN);
 
   button.rise(&change_mode); 
 
-    audio.spk.pause();
+  audio.spk.pause();
+  
   while(true){
     if(push){
-      audio.spk.pause();
+      audio.spk.pause(); 
+      point =0;
       if(change_mode_in ==0)
       {
         if(first_print){
@@ -498,7 +550,7 @@ int main(int argc, char* argv[]) {
               song =2;
             uLCD.cls();
             uLCD.printf("backward songs\n\n\n\n\n");
-            uLCD.printf("%c",list[song]);
+            uLCD.printf("%s",list[song]);
           }
           
           if(mode==1){
@@ -508,19 +560,22 @@ int main(int argc, char* argv[]) {
               song =0;
             uLCD.cls();
             uLCD.printf("forward songs\n\n\n\n\n");
-            uLCD.printf("%c",list[song]);
+            uLCD.printf("%s",list[song]);
           }
             
           if(mode==2){
             uLCD.cls();
             uLCD.printf("change songs\n\n\n\n\n");
-            uLCD.printf("%c\n",list[0]);
-            uLCD.printf("%c\n",list[1]);
-            uLCD.printf("%c\n",list[2]);
+            uLCD.printf("%s\n",list[0]);
+            uLCD.printf("%s\n",list[1]);
+            uLCD.printf("%s\n",list[2]);
           }
           if(mode==3){
             uLCD.cls();
-            uLCD.printf("Taiko game\n");
+            uLCD.printf("Taiko game\n\n\n\n\n");
+            uLCD.printf("%s\n",list[0]);
+            uLCD.printf("%s\n",list[1]);
+            uLCD.printf("%s\n",list[2]);            
           }            
         first_print=0;  
         }
@@ -557,7 +612,7 @@ int main(int argc, char* argv[]) {
             uLCD.cls();
             last_state=0;
             uLCD.printf("backward songs\n\n\n\n\n");
-            uLCD.printf("%c",list[song]); 
+            uLCD.printf("%s",list[song]); 
             main_page =0;
           }
           
@@ -584,7 +639,7 @@ int main(int argc, char* argv[]) {
             uLCD.cls();
             last_state=0;
             uLCD.printf("forward songs\n\n\n\n\n");
-            uLCD.printf("%c",list[song]);
+            uLCD.printf("%s",list[song]);
             main_page =0;
           }
 
@@ -604,9 +659,9 @@ int main(int argc, char* argv[]) {
             uLCD.cls();
             last_state=0;
             uLCD.printf("change songs\n\n\n\n\n");
-            uLCD.printf("%c\n",list[0]);
-            uLCD.printf("%c\n",list[1]);
-            uLCD.printf("%c\n",list[2]);
+            uLCD.printf("%s\n",list[0]);
+            uLCD.printf("%s\n",list[1]);
+            uLCD.printf("%s\n",list[2]);
             main_page =0;
           }
 
@@ -624,7 +679,10 @@ int main(int argc, char* argv[]) {
           if(last_state){
             uLCD.cls();
             last_state=0;
-            uLCD.printf("Taiko game");
+            uLCD.printf("Taiko game\n\n\n\n\n");
+            uLCD.printf("%s\n",list[0]);
+            uLCD.printf("%s\n",list[1]);
+            uLCD.printf("%s\n",list[2]);
             main_page =0;
           }
 
@@ -635,7 +693,9 @@ int main(int argc, char* argv[]) {
           uLCD.color(RED);
 
         //  uLCD.locate(1,2);
-
+            if(Switch == 0){
+              change_mode_in =1;
+            }
         
 
         }   
@@ -643,56 +703,59 @@ int main(int argc, char* argv[]) {
     if(change_mode_in ==1){
         if(gesture_index ==0){
           change_mode_show =0;
-          if(now_song<1)
-            now_song=2;
+          if(song<1)
+            song=2;
           else
           {
-            now_song=now_song-1;
+            song=song-1;
           }
         }
         if(gesture_index ==1){
           change_mode_show =0;
-          if(now_song>1)
-            now_song=0;
+          if(song>1)
+            song=0;
           else
           {
-            now_song=now_song+1;
+            song=song+1;
           }
         }
-        song=now_song;
+        //song=now_song;
         if(change_mode_show ==0){
           uLCD.cls();
           change_mode_show =1;
 
           
-          uLCD.color(RED);   
-          uLCD.printf("change songs\n\n\n\n\n");
-          if(now_song == 0){
+          uLCD.color(RED);  
+          if(mode == 2) 
+            uLCD.printf("change songs\n\n\n\n\n");
+          else 
+            uLCD.printf("Taiko\n\n\n\n\n");
+          if(song == 0){
             uLCD.color(WHITE);
-            uLCD.printf("A\n");
+            uLCD.printf("%s\n",list[0]);
             uLCD.color(RED);
             uLCD.background_color(BLACK);
-            uLCD.printf("B\n");
-            uLCD.printf("C\n");
+
+            uLCD.printf("%s\n",list[1]);
+            uLCD.printf("%s\n",list[2]);
           }
-          if(now_song == 1){
+          if(song == 1){
             uLCD.color(RED);
             uLCD.background_color(BLACK);            
-            uLCD.printf("A\n");            
+            uLCD.printf("%s\n",list[0]);         
             uLCD.color(WHITE);
-            uLCD.printf("B\n");
+            uLCD.printf("%s\n",list[1]);
             uLCD.color(RED);
             uLCD.background_color(BLACK);            
-            uLCD.printf("C\n");   
+            uLCD.printf("%s\n",list[2]); 
 
           }
-          if(now_song == 2){
+          if(song == 2){
             uLCD.color(RED);       
-            uLCD.printf("A\n");            
-            uLCD.printf("B\n");
+            uLCD.printf("%s\n",list[0]);
+            uLCD.printf("%s\n",list[1]);
             uLCD.color(WHITE);         
-            uLCD.printf("C\n");   
-
+            uLCD.printf("%s\n",list[2]);
           }
         }
     }
@@ -701,55 +764,150 @@ int main(int argc, char* argv[]) {
       if(main_page ==0){
         uLCD.color(RED);
         uLCD.background_color(BLACK);
-        now_song = song;
+
         uLCD.cls();
         if(mode!=3){
-          uLCD.printf("Song player\n\n\n\n\nNow Playing:%c\n",list[now_song]);
+          uLCD.printf("Song player\n\n\n\n\nNow Playing:\n\n\n%s\n",list[song]);
         }
         else{
-          uLCD.printf("Taiko game\n\n\n\n\nNow Playing:%c",list[now_song]);  
+          uLCD.printf("Taiko game\n\n\n\n\nNow Playing:\n\n\n%s\n",list[song]);  
         }
         
         main_page =1;
       }
       
-      green_led=0;
-      
-      if(change_song ==0){
+      green_led=1;
+   
+      if((change_song ==0)||(song!=now_song)){
         number =0;
-        if(now_song ==0)
+        if(song ==0)
           pc.printf("%d\r\n",1);
-        if(now_song ==1)
+        if(song ==1)
           pc.printf("%d\r\n",2);
-        if(now_song ==2)
+        if(song ==2)
           pc.printf("%d\r\n",3);
-        
+      now_song = song;           
         loadSignal();
         change_song =1;
         pc.printf("%d\r\n",0);
       }
-
+      if(mode ==3){
+        for(int i=0; i< 42; i++){
+          if(i>=1){
+            if((song_note[i]>(0.66))&&(song_note[i-1]!=song_note[i])){
+              beats[i] =2;
+            }
+            else if((song_note[i]<=(0.66))&&(song_note[i-1]!=song_note[i])){
+              beats[i] =1;
+            }
+            else{
+              beats[i] =0;
+            }
+          }
+          else{
+            if((song_note[i]>(0.66))){
+              beats[i] =2;
+            }
+            else if((song_note[i]<=(0.66))){
+              beats[i] =1;
+            }
+            else{
+              beats[i] =0;
+            }      
+          }
+        }
       
-    //    uLCD.cls();
-
-      int j=0;
+      }           
+      
       change_mode_in =0;
+      change_mode_show =0;
+      
       while(change_song&&!push){
+        int x1=50;
+        int x2=64;
+        int x3=78;
+        int y=120;
+        int radius=4;
+//    uLCD.cls();
+        if(mode ==3){
+          if(beats[number]==2)
+            uLCD.filled_circle(x3, y, radius, RED);
+          else if(beats[number]==1)
+            uLCD.circle(x3, y, radius, RED);
+          else
+            uLCD.filled_circle(x3, y, radius, BLACK);  
+
+          if(beats[number+1]==2)
+            uLCD.filled_circle(x2, y, radius, RED);
+          else if(beats[number+1]==1)
+            uLCD.circle(x2, y, radius, RED);
+          else
+            uLCD.filled_circle(x2, y, radius, BLACK);  
+
+          if(beats[number+2]==2)
+            uLCD.filled_circle(x1, y, radius, RED);
+          else if(beats[number+2]==1)
+            uLCD.circle(x1, y, radius, RED);
+          else
+            uLCD.filled_circle(x1, y, radius, BLACK);  
+
+        }
+
         playqueue.call(playNote,song_note);
-        wait(4*noteLength[number]);
-        //if(j<42){
-        //uLCD.printf("%.3f\r\n",song_note[j]);
-        //  j++;
-        //}
-        
+          get_point =0;
+          calculate.start();
+        if(mode ==3){          
+          while(calculate.read()<4*noteLength[number]){
+            //get_point =0;
+            //uLCD.locate(1,8);
+            uLCD.printf("point=%2D\r",point);
+            if(beats[number]==2&&get_point ==0){
+              if(gesture_index==1){
+                point =point +1;
+                get_point =1;
+              }
+              //else if(gesture_index==0){
+              //  point = point -1;
+              //  get_point =1;
+              //}
+              //else{
+              //  get_point =0;
+              //}
+            }
+            
+            if(beats[number]==1&&get_point ==0){
+              if(gesture_index==0){
+                point =point +1;
+                get_point =1;
+              }
+              //else if(gesture_index==1){
+              //  point = point -1;
+              //  get_point =1;
+              //}
+              //else{
+              //  get_point =0;
+              //}
+            }          
+          }
+        }
+        else        
+          wait(4*noteLength[number]);
+        if(mode ==3){
+          calculate.reset();
+          //if(get_point ==0)
+          //  point = point -1;
+          //uLCD.filled_rectangle(1, 70, 127, 90, BLACK);
+          uLCD.filled_circle(x1, y, radius, BLACK);
+          uLCD.filled_circle(x2, y, radius, BLACK);
+          uLCD.filled_circle(x3, y, radius, BLACK);          
+        }
+        if(number < 42){
+          number = number +1;
+        }
+        else{
+          ;
+        }
       }
-      
-
-
-      
     }
-
-
   }
-
 }
