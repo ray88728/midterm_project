@@ -203,7 +203,7 @@ formatter1 = lambda x: "%s" %x
 
 # send the waveform table to K66F
 
-serdev = '/dev/ttyACM10'
+serdev = '/dev/ttyACM0'
 
 s = serial.Serial(serdev)
 
@@ -274,7 +274,7 @@ while a != 2:
     if b[0] == 52:
         print("Sending the number of the songs ...")
 
-        s.write(3)
+        #s.write(3)
 
         print("Signal sended")
 

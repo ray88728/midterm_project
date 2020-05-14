@@ -93,6 +93,8 @@ int push =0;
 
 char list[3][15]={"Little star", "An dui", "Little bee"};
 
+//={"Little star", "An dui", "Little bee"};
+
 int main_page =0;
 
 int change_mode_in =0;
@@ -104,6 +106,8 @@ int point =0;
 float song_note[42];
 
 float noteLength[42];
+
+char name_buffer;
 
 void loadSignal(void)
 
@@ -185,6 +189,117 @@ void loadSignal(void)
 
 }
 
+void load_name(){
+
+  pc.printf("%d\n",4);
+
+  green_led = 0;
+
+  //serialCount =0;
+
+  char name;
+
+  //int namecount =0;
+
+  int i = 0;
+  
+  while(i < 15)
+
+  {
+
+    if(pc.readable())
+  {
+
+      name_buffer = pc.getc();
+      list[0][i]=name_buffer;
+
+      //serialCount++;
+
+      //if(serialCount == 15)
+
+     // {
+
+     //   serialInBuffer[serialCount] = '\0';
+
+     //   song_note[i] = (float) atof(serialInBuffer);
+
+     //   serialCount = 0;
+
+        //uLCD.printf('%.3f\n',song_note[i]);
+
+        i++;
+      //}
+
+   }
+
+}
+  i =0;
+  //serialCount =0;
+  while(i < 15)
+
+  {
+
+    if(pc.readable())
+  {
+
+      name_buffer = pc.getc();
+      list[1][i]=name_buffer;
+
+      //serialCount++;
+
+      //if(serialCount == 15)
+
+     // {
+
+     //   serialInBuffer[serialCount] = '\0';
+
+     //   song_note[i] = (float) atof(serialInBuffer);
+
+     //   serialCount = 0;
+
+        //uLCD.printf('%.3f\n',song_note[i]);
+
+        i++;
+      //}
+
+   }
+
+}
+  i=0;
+ // serialCount =0;
+  while(i < 15)
+
+  {
+
+    if(pc.readable())
+  {
+
+      name_buffer = pc.getc();
+      list[2][i]=name_buffer;
+
+      //serialCount++;
+
+      //if(serialCount == 15)
+
+     // {
+
+     //   serialInBuffer[serialCount] = '\0';
+
+     //   song_note[i] = (float) atof(serialInBuffer);
+
+     //   serialCount = 0;
+
+        //uLCD.printf('%.3f\n',song_note[i]);
+
+        i++;
+      //}
+
+   }
+
+}
+//serialCount =0;
+  green_led = 1;
+}
 
 void playNote(float freq[])
 
@@ -524,6 +639,10 @@ int main(int argc, char* argv[]) {
 
   green_led =1;
 
+  load_name();
+
+  //list={"Little star", "An dui", "Little bee"};
+
   playthread.start(callback(&playqueue, &EventQueue::dispatch_forever));
 
  // taikothread.start(callback(&taikoqueue, &EventQueue::dispatch_forever));
@@ -533,6 +652,12 @@ int main(int argc, char* argv[]) {
   DNNthread.start(DNN);
 
   button.rise(&change_mode); 
+
+ // load_name();
+
+//  while(pc.readable()){
+//    green_led =0;
+//  }
 
   audio.spk.pause();
   
@@ -550,7 +675,8 @@ int main(int argc, char* argv[]) {
               song =2;
             uLCD.cls();
             uLCD.printf("backward songs\n\n\n\n\n");
-            uLCD.printf("%s",list[song]);
+            uLCD.printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",list[song][0],list[song][1],list[song][2],list[song][3],list[song][4],list[song][5],list[song][6],list[song][7],list[song][8],list[song][9],list[song][10],list[song][11],list[song][12],list[song][13],list[song][14]);
+  
           }
           
           if(mode==1){
@@ -560,22 +686,25 @@ int main(int argc, char* argv[]) {
               song =0;
             uLCD.cls();
             uLCD.printf("forward songs\n\n\n\n\n");
-            uLCD.printf("%s",list[song]);
+            uLCD.printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",list[song][0],list[song][1],list[song][2],list[song][3],list[song][4],list[song][5],list[song][6],list[song][7],list[song][8],list[song][9],list[song][10],list[song][11],list[song][12],list[song][13],list[song][14]);
+  
           }
             
           if(mode==2){
             uLCD.cls();
             uLCD.printf("change songs\n\n\n\n\n");
-            uLCD.printf("%s\n",list[0]);
-            uLCD.printf("%s\n",list[1]);
-            uLCD.printf("%s\n",list[2]);
+            uLCD.printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",list[0][0],list[0][1],list[0][2],list[0][3],list[0][4],list[0][5],list[0][6],list[0][7],list[0][8],list[0][9],list[0][10],list[0][11],list[0][12],list[0][13],list[0][14]);
+            uLCD.printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",list[1][0],list[1][1],list[1][2],list[1][3],list[1][4],list[1][5],list[1][6],list[1][7],list[1][8],list[1][9],list[1][10],list[1][11],list[1][12],list[1][13],list[1][14]);
+            uLCD.printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",list[2][0],list[2][1],list[2][2],list[2][3],list[2][4],list[2][5],list[2][6],list[2][7],list[2][8],list[2][9],list[2][10],list[2][11],list[2][12],list[2][13],list[2][14]);
+
           }
           if(mode==3){
             uLCD.cls();
             uLCD.printf("Taiko game\n\n\n\n\n");
-            uLCD.printf("%s\n",list[0]);
-            uLCD.printf("%s\n",list[1]);
-            uLCD.printf("%s\n",list[2]);            
+            uLCD.printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",list[0][0],list[0][1],list[0][2],list[0][3],list[0][4],list[0][5],list[0][6],list[0][7],list[0][8],list[0][9],list[0][10],list[0][11],list[0][12],list[0][13],list[0][14]);
+            uLCD.printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",list[1][0],list[1][1],list[1][2],list[1][3],list[1][4],list[1][5],list[1][6],list[1][7],list[1][8],list[1][9],list[1][10],list[1][11],list[1][12],list[1][13],list[1][14]);
+            uLCD.printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",list[2][0],list[2][1],list[2][2],list[2][3],list[2][4],list[2][5],list[2][6],list[2][7],list[2][8],list[2][9],list[2][10],list[2][11],list[2][12],list[2][13],list[2][14]);
+           
           }            
         first_print=0;  
         }
@@ -612,7 +741,8 @@ int main(int argc, char* argv[]) {
             uLCD.cls();
             last_state=0;
             uLCD.printf("backward songs\n\n\n\n\n");
-            uLCD.printf("%s",list[song]); 
+            uLCD.printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",list[song][0],list[song][1],list[song][2],list[song][3],list[song][4],list[song][5],list[song][6],list[song][7],list[song][8],list[song][9],list[song][10],list[song][11],list[song][12],list[song][13],list[song][14]);
+  
             main_page =0;
           }
           
@@ -639,7 +769,7 @@ int main(int argc, char* argv[]) {
             uLCD.cls();
             last_state=0;
             uLCD.printf("forward songs\n\n\n\n\n");
-            uLCD.printf("%s",list[song]);
+            uLCD.printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",list[song][0],list[song][1],list[song][2],list[song][3],list[song][4],list[song][5],list[song][6],list[song][7],list[song][8],list[song][9],list[song][10],list[song][11],list[song][12],list[song][13],list[song][14]);
             main_page =0;
           }
 
@@ -659,9 +789,9 @@ int main(int argc, char* argv[]) {
             uLCD.cls();
             last_state=0;
             uLCD.printf("change songs\n\n\n\n\n");
-            uLCD.printf("%s\n",list[0]);
-            uLCD.printf("%s\n",list[1]);
-            uLCD.printf("%s\n",list[2]);
+            uLCD.printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",list[0][0],list[0][1],list[0][2],list[0][3],list[0][4],list[0][5],list[0][6],list[0][7],list[0][8],list[0][9],list[0][10],list[0][11],list[0][12],list[0][13],list[0][14]);
+            uLCD.printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",list[1][0],list[1][1],list[1][2],list[1][3],list[1][4],list[1][5],list[1][6],list[1][7],list[1][8],list[1][9],list[1][10],list[1][11],list[1][12],list[1][13],list[1][14]);
+            uLCD.printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",list[2][0],list[2][1],list[2][2],list[2][3],list[2][4],list[2][5],list[2][6],list[2][7],list[2][8],list[2][9],list[2][10],list[2][11],list[2][12],list[2][13],list[2][14]);
             main_page =0;
           }
 
@@ -680,9 +810,9 @@ int main(int argc, char* argv[]) {
             uLCD.cls();
             last_state=0;
             uLCD.printf("Taiko game\n\n\n\n\n");
-            uLCD.printf("%s\n",list[0]);
-            uLCD.printf("%s\n",list[1]);
-            uLCD.printf("%s\n",list[2]);
+            uLCD.printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",list[0][0],list[0][1],list[0][2],list[0][3],list[0][4],list[0][5],list[0][6],list[0][7],list[0][8],list[0][9],list[0][10],list[0][11],list[0][12],list[0][13],list[0][14]);
+            uLCD.printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",list[1][0],list[1][1],list[1][2],list[1][3],list[1][4],list[1][5],list[1][6],list[1][7],list[1][8],list[1][9],list[1][10],list[1][11],list[1][12],list[1][13],list[1][14]);
+            uLCD.printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",list[2][0],list[2][1],list[2][2],list[2][3],list[2][4],list[2][5],list[2][6],list[2][7],list[2][8],list[2][9],list[2][10],list[2][11],list[2][12],list[2][13],list[2][14]);
             main_page =0;
           }
 
@@ -732,30 +862,37 @@ int main(int argc, char* argv[]) {
             uLCD.printf("Taiko\n\n\n\n\n");
           if(song == 0){
             uLCD.color(WHITE);
-            uLCD.printf("%s\n",list[0]);
+            uLCD.printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",list[0][0],list[0][1],list[0][2],list[0][3],list[0][4],list[0][5],list[0][6],list[0][7],list[0][8],list[0][9],list[0][10],list[0][11],list[0][12],list[0][13],list[0][14]);
+
             uLCD.color(RED);
             uLCD.background_color(BLACK);
 
-            uLCD.printf("%s\n",list[1]);
-            uLCD.printf("%s\n",list[2]);
+            uLCD.printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",list[1][0],list[1][1],list[1][2],list[1][3],list[1][4],list[1][5],list[1][6],list[1][7],list[1][8],list[1][9],list[1][10],list[1][11],list[1][12],list[1][13],list[1][14]);
+            uLCD.printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",list[2][0],list[2][1],list[2][2],list[2][3],list[2][4],list[2][5],list[2][6],list[2][7],list[2][8],list[2][9],list[2][10],list[2][11],list[2][12],list[2][13],list[2][14]);
+
           }
           if(song == 1){
             uLCD.color(RED);
             uLCD.background_color(BLACK);            
-            uLCD.printf("%s\n",list[0]);         
+            uLCD.printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",list[0][0],list[0][1],list[0][2],list[0][3],list[0][4],list[0][5],list[0][6],list[0][7],list[0][8],list[0][9],list[0][10],list[0][11],list[0][12],list[0][13],list[0][14]);
+       
             uLCD.color(WHITE);
-            uLCD.printf("%s\n",list[1]);
+            uLCD.printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",list[1][0],list[1][1],list[1][2],list[1][3],list[1][4],list[1][5],list[1][6],list[1][7],list[1][8],list[1][9],list[1][10],list[1][11],list[1][12],list[1][13],list[1][14]);
+
             uLCD.color(RED);
             uLCD.background_color(BLACK);            
-            uLCD.printf("%s\n",list[2]); 
+            uLCD.printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",list[2][0],list[2][1],list[2][2],list[2][3],list[2][4],list[2][5],list[2][6],list[2][7],list[2][8],list[2][9],list[2][10],list[2][11],list[2][12],list[2][13],list[2][14]);
+
 
           }
           if(song == 2){
             uLCD.color(RED);       
-            uLCD.printf("%s\n",list[0]);
-            uLCD.printf("%s\n",list[1]);
+            uLCD.printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",list[0][0],list[0][1],list[0][2],list[0][3],list[0][4],list[0][5],list[0][6],list[0][7],list[0][8],list[0][9],list[0][10],list[0][11],list[0][12],list[0][13],list[0][14]);
+            uLCD.printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",list[1][0],list[1][1],list[1][2],list[1][3],list[1][4],list[1][5],list[1][6],list[1][7],list[1][8],list[1][9],list[1][10],list[1][11],list[1][12],list[1][13],list[1][14]);
+
             uLCD.color(WHITE);         
-            uLCD.printf("%s\n",list[2]);
+            uLCD.printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",list[2][0],list[2][1],list[2][2],list[2][3],list[2][4],list[2][5],list[2][6],list[2][7],list[2][8],list[2][9],list[2][10],list[2][11],list[2][12],list[2][13],list[2][14]);
+
           }
         }
     }
@@ -767,10 +904,10 @@ int main(int argc, char* argv[]) {
 
         uLCD.cls();
         if(mode!=3){
-          uLCD.printf("Song player\n\n\n\n\nNow Playing:\n\n\n%s\n",list[song]);
+          uLCD.printf("Song player\n\n\n\n\nNow Playing:\n\n\n%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",list[song][0],list[song][1],list[song][2],list[song][3],list[song][4],list[song][5],list[song][6],list[song][7],list[song][8],list[song][9],list[song][10],list[song][11],list[song][12],list[song][13],list[song][14]);
         }
         else{
-          uLCD.printf("Taiko game\n\n\n\n\nNow Playing:\n\n\n%s\n",list[song]);  
+          uLCD.printf("Taiko game\n\n\n\n\nNow Playing:\n\n\n%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",list[song][0],list[song][1],list[song][2],list[song][3],list[song][4],list[song][5],list[song][6],list[song][7],list[song][8],list[song][9],list[song][10],list[song][11],list[song][12],list[song][13],list[song][14]);  
         }
         
         main_page =1;
